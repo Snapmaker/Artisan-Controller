@@ -17,10 +17,10 @@ _VERSION = "1.1.0"
 MINOR_IMAGE_TYPE_CONTROLLER   = 0
 MINOR_IMAGE_TYPE_MODULE       = 1
 
-# type id in major image
+# type id in major image (screen app UpdateFileParser: MC=0/EM=1/BT=2/SC=3)
 TYPE_MAIN_CONTROLLER = 0
 TYPE_EXTERNAL_MODULE = 1
-TYPE_SCREEN_MODULE = 2
+TYPE_SCREEN_MODULE = 3  # Artisan; SM2 upstream uses 2 (2 is BT segment here)
 
 
 def pack_minor_image(image_type, start_id, end_id, version, input, output):
@@ -83,7 +83,8 @@ def append_body(output, filename):
         output.write(f.read())
 
 
-def pack_major_image(controller=None, module=None, screen=None, version=None):
+def pack_major_image(controller=None, module=None, screen=None, version=None,
+                     prefix="Artisan"):
     count = 0
     date  = datetime.datetime.today().strftime('%Y%m%d')
     version_pattern = r"V\d+\.\d+\.\d+"
@@ -109,7 +110,7 @@ def pack_major_image(controller=None, module=None, screen=None, version=None):
         if version == None:
             version = re.search(version_pattern, screen)[0]
 
-    full_version = "SM3_{}_{}".format(version, date)
+    full_version = "{}_{}_{}".format(prefix, version, date)
 
     major_image = join(cur_dir, "{}.bin".format(full_version))
     if os.path.exists(major_image):
@@ -319,12 +320,18 @@ def main(argv=None):
                         type=str,
                         default=None)
 
+    parser.add_argument('--prefix', '-p',
+                        help="prefix of major image version (default Artisan)",
+                        type=str,
+                        default="Artisan")
+
     if argv != None:
         args = parser.parse_args(argv)
     else:
         args = parser.parse_args()
 
-    pack_major_image(args.controller, args.module, args.screen, args.version)
+    pack_major_image(args.controller, args.module, args.screen, args.version,
+                     args.prefix)
 
 
 if __name__ == "__main__":
