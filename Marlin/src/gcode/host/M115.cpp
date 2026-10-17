@@ -170,7 +170,13 @@ void GcodeSuite::M115() {
     cap_line(F("BABYSTEPPING"), ENABLED(BABYSTEPPING));
 
     // CHAMBER_TEMPERATURE (M141, M191)
-    cap_line(F("CHAMBER_TEMPERATURE"), ENABLED(HAS_HEATED_CHAMBER));
+    // The outer bed zone reuses the chamber heater, so it is not a chamber.
+    cap_line(F("CHAMBER_TEMPERATURE"), ENABLED(HAS_HEATED_CHAMBER) && DISABLED(SNAPMAKER_DOUBLE_ZONE_BED));
+
+    // Multiple heated bed zones.
+    // Temperatures are reported as B0 (center) and B1 (outer).
+    // M140/M190 P0 heats the center only; any other P (or omitting P) heats the full bed.
+    cap_line(F("BED_ZONES"), ENABLED(SNAPMAKER_DOUBLE_ZONE_BED));
 
     // COOLER_TEMPERATURE (M143, M193)
     cap_line(F("COOLER_TEMPERATURE"), ENABLED(HAS_COOLER));
